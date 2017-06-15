@@ -10,7 +10,9 @@ A repository for work on predicting energy prices on the Texas wholesale energy 
 ### SQL Database
 The work in this repository is heavily dependant on a SQL database that includes data on the Ercot Power Grid.
 
-The dump file is roughly 3GB, so could not be included in the repository itself. It has been uploaded to my Google Drive account if it needs to be accesesed.
+The dump file is roughly 3GB, so could not be included in the repository itself. It has been uploaded to a Google Drive folder if it needs to be accesesed.
+
+[ercot_data](https://drive.google.com/drive/folders/0B1IvzveLiKdHUXFEWFRROEpRdVU?usp=sharing)
 
 #### Importing the SQL Databse
   

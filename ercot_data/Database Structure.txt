@@ -1,0 +1,24 @@
+Once imported to SQL, the ercot_data database should look like the following:
+
++----------------------+
+| Tables_in_ercot_data |
++----------------------+
+| crr_ownership        |
+| dam_lmp0             |
+| dam_lmp1             |
+| dam_lmp10            |
+| dam_lmp11            |
+| dam_lmp12            |
+| dam_lmp2             |
+| dam_lmp3             |
+| dam_lmp4             |
+| dam_lmp5             |
+| dam_lmp6             |
+| dam_lmp7             |
+| dam_lmp8             |
+| dam_lmp9             |
+| dam_spps             |
+| load_forecast_by_wz  |
+| natural_gas_prices   |
+| wind_forecasts       |
++----------------------+

@@ -6,6 +6,7 @@ A repository for work on predicting energy prices on the Texas wholesale energy 
   * Python 2.7.13
   * MySQL Community 5.7.18
   * Anaconda 4.4 for Python 2.7
+  * PyMySQL
 
 ### SQL Database
 The work in this repository is heavily dependant on a SQL database that includes data on the Ercot Power Grid.

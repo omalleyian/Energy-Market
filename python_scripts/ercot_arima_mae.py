@@ -32,13 +32,13 @@ for i in range(5):
     # Preform mean model calculations on data
     m = np.mean(matrix_train)
     m_matrix = [m] * len(matrix_test)
-    mae_mean = mae(m_matrix, matrix_test)
+    mae_mean = mae(matrix_test, m_matrix)
     print "\tMean Model: " + str(mae_mean)
 
     # Perform random walk model calculations on data
     walk = matrix_test[:-1]
     walk_test = matrix_test[1:]
-    mae_walk = mae(walk, walk_test)
+    mae_walk = mae(walk_test, walk)
     print "\tRandom Walk: " + str(mae_walk)
 
     # ARIMA(2,0,1,1)
@@ -53,6 +53,21 @@ for i in range(5):
 
     # ARIMA(2,0,3,1)
     arima = ARIMA(p = 2, d = 0, q = 3, seasonal = 1)
+    arima.fit(matrix_train)
+    print "\tARIMA(2,0,3): " + str(arima.mae(matrix_test))
+
+    # ARIMA(2,0,1,24)
+    arima = ARIMA(p = 2, d = 0, q = 1, seasonal = 24)
+    arima.fit(matrix_train)
+    print "\tARIMA(2,0,3): " + str(arima.mae(matrix_test))
+
+    # ARIMA(2,0,2,24)
+    arima = ARIMA(p = 2, d = 0, q = 2, seasonal = 24)
+    arima.fit(matrix_train)
+    print "\tARIMA(2,0,3): " + str(arima.mae(matrix_test))
+
+    # ARIMA(2,0,3,24)
+    arima = ARIMA(p = 2, d = 0, q = 3, seasonal = 24)
     arima.fit(matrix_train)
     print "\tARIMA(2,0,3): " + str(arima.mae(matrix_test))
 

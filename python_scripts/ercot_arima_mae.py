@@ -9,12 +9,12 @@ from ARIMA import ARIMA
 def mape(actual, forcast):
     x = (np.asarray(actual)).flatten()
     y = (np.asarray(forcast)).flatten()
-    return np.mean(np.square((x - y) / x))
+    return np.mean(np.square(np.abs((x - y)) / x))
 
 def mae(actual, forcast):
     x = (np.asarray(actual)).flatten()
     y = (np.asarray(forcast)).flatten()
-    return np.mean((x - y))
+    return np.mean(np.abs((x - y)))
 
 # Get list of nodes from SQL database
 ercot = ercot_data_interface(password="Is79t5Is79t5")

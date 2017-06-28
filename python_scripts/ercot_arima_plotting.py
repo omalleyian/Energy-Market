@@ -59,31 +59,41 @@ for i in range(24):
 #
 # plt.show()
 
-## Merge each prediction model into the same list to be
-## ploted against the actual values
-merged_prediction = np.zeros(8617)
-for i in range(24):
+# Make predictions with the ARIMA models
+# Merge the predictions into a single array to be ploted against actual data
+predictions = []
+merged_prediction = np.zeros(8640)
+merged_actual = np.zeros(8640)
+for i in range(len(arima_models)):
     prediction, actual = arima_models[i].predict(hours_2012[i])
-
     prediction = prediction.squeeze().tolist()
-    for j in range(len(prediction)-1):
+    actual = actual.squeeze().tolist()
+
+    if len(prediction) < 360:
+        prediction.extend(np.zeros(1))
+        actual.extend(np.zeros(1))
+
+    for j in range(len(prediction)):
         front = [0] * i
         back = [0] * (23-i)
         index = j * 24
-        prediction[index:index] = front
-        prediction[index+i+1:index+i+1] = back
 
-    if len(prediction) < 8617:
-        prediction.extend(np.zeros(24))
+        prediction[index:index] = front
+        actual[index:index] = front
+
+        prediction[index+i+1:index+i+1] = back
+        actual[index+i+1:index+i+1] = back
 
     merged_prediction += prediction
+    merged_actual += actual
+
 
     ## DEBUGGING - Output each prediction to a row of a csv file
     # with open("output.csv",'ab') as resutlFile:
     #     wr = csv.writer(resutlFile, dialect='excel')
     #     wr.writerow(prediction)
 
-plt.plot(matrix_2012, linestyle='-', label='actual')
-plt.plot(merged_prediction, linestyle=':', label='prediction', alpha=1.0)
+plt.plot(merged_actual, label='actual')
+plt.plot(merged_prediction, label='prediction', alpha=0.5)
 plt.legend()
 plt.show()

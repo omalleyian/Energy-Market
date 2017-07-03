@@ -13,87 +13,82 @@ from sklearn import datasets, linear_model
 sys.path.append("/home/omalleyian/Documents/energy_market_project/scripts")
 from ercot_data_interface import ercot_data_interface
 from ARIMA import ARIMA
+sys.path.append("/home/omalleyian/Documents/Energy-Market/python_scripts")
+import performance_metrics as perf
 import csv
 
 ercot = ercot_data_interface(password="Is79t5Is79t5")
-nodes_crr = ercot.get_CRR_nodes()
 nodes_all = ercot.all_nodes
-nodes_source = ercot.get_sources_sinks()
 df_2011 = ercot.query_prices(nodes_all[0], "2011-01-01","2011-12-31")
 df_2012 = ercot.query_prices(nodes_all[0], "2012-01-01","2012-12-31")
 matrix_2011 = df_2011.as_matrix()
 matrix_2012 = df_2012.as_matrix()
-
-arima = ARIMA(p = 2, d = 0, q = 0, seasonal = 24)
-arima.fit(matrix_2011)
+#
+# arima = ARIMA(p = 2, d = 0, q = 0, seasonal = 24)
+# arima.fit(matrix_2011)
 # arima.plot_predicted_vs_actual(matrix_2012)
 # print arima.mae(matrix_2012)
 
-#For focast of f=24
-#wavenet
-hours_2011 = []
-hours_2012 = []
-arima_models = []
+# Arima Forcasting with variable horizon
 
-for i in range(24):
-    ind_2011 = np.arange(i,matrix_2011.shape[0],24)
-    ind_2012 = np.arange(i,matrix_2012.shape[0],24)
+def arima_forcast(train, test, horizon, p, d, q, seasonal):
+    # First split data into subsets offset by 24, and fit ARIMA models to these subsets.
+    hours_train = []
+    hours_test = []
+    arima_models = []
+    loss = p + q + seasonal - 1
 
-    hours_2011.append(matrix_2011[ind_2011])
-    hours_2012.append(matrix_2012[ind_2012])
+    for i in range(horizon):
+        ind_train = np.arange(i,train.shape[0],horizon)
+        ind_test = np.arange(i,test.shape[0],horizon)
 
-    arima = ARIMA(p = 2, d = 0, q = 1, seasonal = 1)
-    arima.fit(matrix_2011[ind_2011])
-    arima_models.append(arima)
+        hours_train.append(train[ind_train])
+        hours_test.append(test[ind_test])
 
-## Plot every prediction model on its own graph - BAD
-# for i in range(24):
-#     arima_models[i].plot_predicted_vs_actual(hours_2012[i])
+        arima = ARIMA(p, d, q, seasonal)
+        arima.fit(train[ind_train])
+        arima_models.append(arima)
 
-## Plot each prediction model on the same graph, but unmerged - BAD
-# predictions = []
-# for i in range(24):
-#     prediction, actual = arima_models[i].predict(hours_2012[i])
-#     predictions.append(prediction)
-#     plt.plot(prediction)
-#
-# plt.show()
+    # Make predictions with the ARIMA models
+    # Merge the predictions into a single array to be ploted against actual data
+    merged_prediction = np.zeros(horizon * (test.shape[0] / horizon - loss))
+    merged_actual = np.zeros(horizon * (test.shape[0] / horizon - loss))
 
-# Make predictions with the ARIMA models
-# Merge the predictions into a single array to be ploted against actual data
-predictions = []
-merged_prediction = np.zeros(8640)
-merged_actual = np.zeros(8640)
-for i in range(len(arima_models)):
-    prediction, actual = arima_models[i].predict(hours_2012[i])
-    prediction = prediction.squeeze().tolist()
-    actual = actual.squeeze().tolist()
+    for i in range(len(arima_models)):
+        prediction, actual = arima_models[i].predict(hours_test[i])
+        prediction = prediction.squeeze().tolist()
+        actual = actual.squeeze().tolist()
 
-    if len(prediction) < 360:
-        prediction.extend(np.zeros(1))
-        actual.extend(np.zeros(1))
+        if len(prediction) < (len(test) / horizon) - loss:
+            prediction.extend(np.zeros((len(test) / horizon - loss) - len(prediction)))
+            actual.extend(np.zeros((len(test) / horizon - loss) - len(actual)))
 
-    for j in range(len(prediction)):
-        front = [0] * i
-        back = [0] * (23-i)
-        index = j * 24
+        for j in range(len(prediction)):
+            front = [0] * i
+            back = [0] * (horizon-1-i)
+            index = j * horizon
 
-        prediction[index:index] = front
-        actual[index:index] = front
+            prediction[index:index] = front
+            actual[index:index] = front
 
-        prediction[index+i+1:index+i+1] = back
-        actual[index+i+1:index+i+1] = back
+            prediction[index+i+1:index+i+1] = back
+            actual[index+i+1:index+i+1] = back
 
-    merged_prediction += prediction
-    merged_actual += actual
+        merged_prediction += prediction
+        merged_actual += actual
 
+        ## DEBUGGING - Output each prediction to a row of a csv file
+        # with open("output.csv",'ab') as resutlFile:
+        #     wr = csv.writer(resutlFile, dialect='excel')
+        #     wr.writerow(prediction)
 
-    ## DEBUGGING - Output each prediction to a row of a csv file
-    # with open("output.csv",'ab') as resutlFile:
-    #     wr = csv.writer(resutlFile, dialect='excel')
-    #     wr.writerow(prediction)
+    return merged_prediction, merged_actual
 
+merged_prediction, merged_actual = \
+    arima_forcast(matrix_2011, matrix_2012, 24, 2, 0, 1, 1)
 plt.plot(merged_actual, label='actual')
 plt.plot(merged_prediction, label='prediction', alpha=0.5)
 plt.legend()
 plt.show()
+
+print "Merged MAE: " + str(perf.mae(merged_actual, merged_prediction))

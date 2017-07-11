@@ -41,3 +41,7 @@ Thumbs.db
 # Jupyter Notebook Checkpoints #
 ################################
 .ipynb_checkpoints
+
+# SFTP Server Settings #
+########################
+sftp-config.json

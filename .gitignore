@@ -45,3 +45,7 @@ Thumbs.db
 # SFTP Server Settings #
 ########################
 sftp-config.json
+
+# Results #
+###########
+/results
